@@ -1,40 +1,59 @@
-openshift-router
-================
+# Custom openshift router
 
-This repository contains the OpenShift routers for NGINX, HAProxy, and F5. They read `Route` objects out of the
-OpenShift API and allow ingress to services. HAProxy is currently the reference implementation. See the details
-in each router image.
+**PoC for a Custom Openshift-router with 3scale authorization capabilities** 
 
-These images are managed by the `cluster-ingress-operator` in an OpenShift 4.0+ cluster.
+**Don't use in production**
 
-The template router code (`openshift-router`) is generic and creates config files on disk based on the state
-of the cluster. The process launches proxies as children and triggers reloads as necessary after new config
-has been written. The standard logic for handling conflicting routes, supporting wildcards, reporting status
-back to the Route object, and metrics live in the standard process.
+This is a modified version of the openshift-router to check if it makes sense to add 3scale authorization capabilities to 
+the openshift default ingress.
 
 
-Deploying to Kubernetes
------------------------
+## Configuration
 
-The OpenShift router can be run against a vanilla Kubernetes cluster, although some of the security protections
-present in the API are not possible with CRDs.
+Replace your router image:
 
-To deploy, clone this repository and then run:
+```bash
+oc patch dc router -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"quay.io/jmprusi/openshift-custom-router:latest"}]}}}}'
+```
 
-    $ kubectl create -f deploy/
+Add the 3scale-haproxy container:
 
-You will then be able to create a `Route` that points to a service on your cluster and the router pod will
-forward your traffic from port 80 to your service endpoints.  You can run the example like:
+```yaml
+      - image: quay.io/jmprusi/3scale-haproxy:latest
+        imagePullPolicy: Always
+        name: 3scale-haproxy
+        ports:
+        - containerPort: 12345
+          hostPort: 12345
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+```
 
-    $ kubectl create -f example/
+Enable the 3scale authentication with the ENV var:
 
-And access the router via the node it is located on. If you're running locally on minikube or another solution,
-just run:
+```bash
+oc set env dc/router ROUTER_ENABLE_THREESCALE_SPOA=true -n default -c router
+```
 
-    $ curl http://localhost -H "Host: example.local"
+## Protecting a Route
 
-to see your route and:
+To protect a Route, you need to add those annotations: 
 
-    $ kubectl get routes
+```yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/3scale-secured-api: "True"
+    haproxy.router.openshift.io/3scale-serviceid: "111111111"
+    haproxy.router.openshift.io/3scale-systemurl: https://myaccount-admin.3scale.net:443/
+    haproxy.router.openshift.io/3scale-test: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
 
-to see details of your routes.
+The 3scale account should be configured with the "on-premises apicast" option, and the configuration should be published to the production environment of your 3scale account.
+
+Works with 3scale on-premises or SaaS.
+
+ 

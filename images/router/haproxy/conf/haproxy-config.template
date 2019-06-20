@@ -413,9 +413,9 @@ monitor-uri /healthz
 
                 {{ if isTrue (env "ROUTER_ENABLE_THREESCALE_SPOA") -}}
                     {{- if isTrue (index $cfg.Annotations "haproxy.router.openshift.io/3scale-secured-api") }}
-                        tcp-request content set-var(req.service_id) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-serviceid" }} ")
-                        tcp-request content set-var(req.system_url) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-systemurl" }} ")
-                        tcp-request content set-var(req.access_token) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-accesstoken" }} ")
+                        tcp-request content set-var(req.service_id) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-serviceid" }}")
+                        tcp-request content set-var(req.system_url) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-systemurl" }}")
+                        tcp-request content set-var(req.access_token) str("{{ index $cfg.Annotations "haproxy.router.openshift.io/3scale-accesstoken" }}")
                         filter spoe engine 3scale-api-authorization config spoe-api-authorization.conf
                         http-request deny deny_status 403 unless { var(txn.3scale.authorized) -m int eq 1 }
                     {{- end }}

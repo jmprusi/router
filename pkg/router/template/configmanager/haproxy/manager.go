@@ -1083,6 +1083,10 @@ func backendModAnnotations(route *routev1.Route) map[string]string {
 // haproxy config for a backend.
 func modAnnotationsList(termination routev1.TLSTerminationType) []string {
 	annotations := []string{
+		"haproxy.router.openshift.io/3scale-secured-api",
+		"haproxy.router.openshift.io/3scale-serviceid",
+		"haproxy.router.openshift.io/3scale-systemurl",
+		"haproxy.router.openshift.io/3scale-accesstoken",
 		"haproxy.router.openshift.io/balance",
 		"haproxy.router.openshift.io/ip_whitelist",
 		"haproxy.router.openshift.io/timeout",

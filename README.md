@@ -108,7 +108,7 @@ metadata:
     haproxy.router.openshift.io/3scale-secured-api: "True"
     haproxy.router.openshift.io/3scale-serviceid: "111111111"
     haproxy.router.openshift.io/3scale-systemurl: https://myaccount-admin.3scale.net:443/
-    haproxy.router.openshift.io/3scale-test: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    haproxy.router.openshift.io/3scale-accesstoken: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 The 3scale account should be configured with the "on-premises apicast" option, and the configuration should be published to the production environment of your 3scale account.
